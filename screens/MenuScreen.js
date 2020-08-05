@@ -1,10 +1,11 @@
-import React, {useLayoutEffect} from "react";
+import React, { useLayoutEffect } from "react";
 import { StyleSheet, Button, View } from "react-native";
 import { useDispatch } from "react-redux";
 
 import Colors from "../constants/Colors";
 import { logout } from "../store/actions/auth";
 import ImageTop from "../components/UI/ImageTop";
+import defStyle from "../constants/Style";
 
 export default function MenuScreen({ navigation }) {
   const dispatch = useDispatch();
@@ -37,7 +38,7 @@ export default function MenuScreen({ navigation }) {
             onPress={() => handleButton("Journal")}
           />
           <ButtonMenu
-            title={"Transférer les mesures au serveur"}
+            title={"Synchroniser avec le serveur"}
             onPress={() => handleButton("Synchro")}
           />
           <ButtonMenu
@@ -54,22 +55,21 @@ export default function MenuScreen({ navigation }) {
 const ButtonMenu = ({ title, onPress, color }) => {
   return (
     <View style={styles.button}>
-      <Button title={title} color={color || Colors.primary} onPress={onPress} />
+      <Button
+        title={title}
+        color={color || Colors.primary}
+        onPress={onPress}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  container: {
-    justifyContent: "center",
-    alignItems: "center",
-    flex: 1,
+  ...defStyle,
+  buttonContainer: {
+    width: "80%",
   },
   button: {
-    marginVertical: 5,
+    marginVertical: 10,
   },
 });

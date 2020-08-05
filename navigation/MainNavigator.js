@@ -1,22 +1,16 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Platform, SafeAreaView, Button, View } from "react-native";
+import { Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useDispatch } from "react-redux";
 
 import LoginScreen from "../screens/LoginScreen";
 import MenuScreen from "../screens/MenuScreen";
 import ConfigScreen from "../screens/ConfigCapteurScreen";
 import RechercheCapteursScreen from "../screens/RechercheCapteursScreen";
-import {
-  ConfigMesure,
-  CourbeMesure,
-  OptionsMesure,
-} from "../screens/MesureScreen";
+import { ConfigMesure, CourbeMesure } from "../screens/MesureScreen";
+import { JournalMesures } from "../screens/JournalScreen"
 import Colors from "../constants/Colors";
-import * as authActions from "../store/actions/auth";
-import { TabActions } from "@react-navigation/native";
 
 /*------------- Stack navigator -----------------------*/
 
@@ -43,11 +37,8 @@ export const MainNavigator = () => {
         name="Recherche"
         component={RechercheCapteursScreen}
       />
-      <MesureStackNavigator.Screen
-        name="Mesure"
-        component={MesureNavigator}
-        screenOptions={OptionsMesure}
-      />
+      <MesureStackNavigator.Screen name="Journal" component={JournalMesures} />
+      <MesureStackNavigator.Screen name="Mesure" component={MesureNavigator} />
       <MesureStackNavigator.Screen name="Config" component={ConfigScreen} />
     </MesureStackNavigator.Navigator>
   );
@@ -57,9 +48,28 @@ const MesureTabNavigator = createBottomTabNavigator();
 
 export const MesureNavigator = () => {
   return (
-    <MesureTabNavigator.Navigator>
+    <MesureTabNavigator.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ color, size }) => {
+          let iconName = "md-close-circle";
+          if (route.name === "config")
+            iconName =
+              Platform.OS === "android" ? "md-settings" : "ios-settings";
+          else if (route.name === "courbe")
+            iconName = Platform.OS === "android" ? "md-stats" : "ios-stats";
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+      })}
+      tabBarOptions={{
+        activeTintColor: Colors.accent,
+        inactiveTintColor: "gray",
+      }}
+    >
       <MesureTabNavigator.Screen name="config" component={ConfigMesure} />
-      <MesureTabNavigator.Screen name="courbe" component={CourbeMesure} />
+      <MesureTabNavigator.Screen
+        name="courbe"
+        component={CourbeMesure}
+      />
     </MesureTabNavigator.Navigator>
   );
 };

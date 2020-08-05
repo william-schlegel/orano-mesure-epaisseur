@@ -18,6 +18,7 @@ import Card from "../components/UI/Card";
 import Colors from "../constants/Colors";
 import ImageTop from "../components/UI/ImageTop"
 import * as authActions from "../store/actions/auth";
+import defStyle from "../constants/Style";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email().required("merci de saisir un email valide"),
@@ -103,35 +104,16 @@ const LoginScreen = (props) => {
 };
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  ...defStyle,
   h1: {
-    width: "100%",
-    fontSize: 25,
+    ...defStyle.h1,
     textAlign: "center",
-    marginBottom: 10,
-  },
-  h2: {
-    width: "100%",
-    fontSize: 17,
-    textAlign: "center",
-    marginBottom: 8,
   },
   authContainer: {
     width: "80%",
     maxWidth: 400,
     maxHeight: 400,
     padding: 20,
-  },
-  buttonContainer: {
-    marginTop: 10,
   },
 });
 

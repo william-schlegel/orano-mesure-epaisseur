@@ -25,6 +25,7 @@ import {
   addCapteur,
   clearCapteurs,
 } from "../store/actions/capteur";
+import defStyle from "../constants/Style";
 
 export default function RechercheCapteursScreen({ navigation }) {
   const [recherche, setRecherche] = useState(true);
@@ -60,17 +61,7 @@ export default function RechercheCapteursScreen({ navigation }) {
         info = await get(`/${mac}`);
         if (!response.ok) info = { macAddress: mac };
       }
-      dispatch(
-        addCapteur(
-          info.macAddress,
-          info.id,
-          info.materiau,
-          info.description,
-          info.vitesseProp,
-          info.zone,
-          info.alerte
-        )
-      );
+      dispatch(addCapteur(info));
       return info;
     };
 
@@ -97,41 +88,45 @@ export default function RechercheCapteursScreen({ navigation }) {
   const renderItem = ({ item }) => {
     // item contient la mac address
     return (
-      <Card style={styles.card}>
-        <View style={styles.cardContent}>
-          {item.id && (
-            <View>
-              <View style={styles.ligneTexte}>
-                <Text>{item.id}</Text>
-                <Text>{item.description}</Text>
-                <Text>{item.dernierReleve}</Text>
+      <View style={styles.cardContainer}>
+        <Card style={styles.card}>
+          <View style={styles.cardContent}>
+            {item.id && (
+              <View>
+                <View style={styles.ligneTexte}>
+                  <Text>{item.id}</Text>
+                  <Text>{item.description}</Text>
+                  <Text>{item.dernierReleve}</Text>
+                </View>
+                <View style={styles.buttons}>
+                  <Button
+                    color={Colors.primary}
+                    onPress={() => selectCapt(item.macAddress)}
+                    title="Sélectionner"
+                    style={styles.button}
+                  />
+                  <Button
+                    color={Colors.accent}
+                    onPress={() => configure(item.macAddress)}
+                    title="Configurer"
+                    style={styles.button}
+                  />
+                </View>
               </View>
-              <View style={styles.buttons}>
-                <Button
-                  color={Colors.primary}
-                  onPress={() => selectCapt(item.macAddress)}
-                  title="Sélectionner"
-                />
+            )}
+            {!item.id && (
+              <View>
+                <Text>Inconnu</Text>
                 <Button
                   color={Colors.accent}
                   onPress={() => configure(item.macAddress)}
                   title="Configurer"
                 />
               </View>
-            </View>
-          )}
-          {!item.id && (
-            <View>
-              <Text>Inconnu</Text>
-              <Button
-                color={Colors.accent}
-                onPress={() => configure(item.macAddress)}
-                title="Configurer"
-              />
-            </View>
-          )}
-        </View>
-      </Card>
+            )}
+          </View>
+        </Card>
+      </View>
     );
   };
 
@@ -158,35 +153,21 @@ export default function RechercheCapteursScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    alignItems: "center",
-  },
-  container: {
-    width: "90%",
-  },
-  h1: {
-    width: "100%",
-    fontSize: 25,
-    marginBottom: 10,
-  },
-  card: {
-    marginVertical: 10,
-    padding: 10,
-  },
-  cardContent: {
-    margin: 5,
-  },
+  ...defStyle,
   ligneTexte: {
     flexDirection: "row",
-    margin: 10,
     alignItems: "center",
     justifyContent: "space-between",
+    width: "100%",
   },
   buttons: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     margin: 10,
+  },
+  button: {
+    width: "100%",
+    marginHorizontal: 5,
   },
 });

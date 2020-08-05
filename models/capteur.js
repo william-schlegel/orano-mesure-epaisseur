@@ -7,7 +7,13 @@ class Capteur {
     vitesseProp,
     zone,
     alerte,
-    photo
+    photo,
+    debutA,
+    largeurA,
+    seuilA,
+    debutB,
+    largeurB,
+    seuilB
   ) {
     this.macAddress = macAddress;
     this.id = id;
@@ -17,6 +23,12 @@ class Capteur {
     this.zone = zone;
     this.alerte = alerte;
     this.photo = photo;
+    this.debutA = debutA;
+    this.largeurA = largeurA;
+    this.seuilA = seuilA;
+    this.debutB = debutB;
+    this.largeurB = largeurB;
+    this.seuilB = seuilB;
   }
 }
 

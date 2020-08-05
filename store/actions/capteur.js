@@ -4,6 +4,17 @@ export const CLEAR_CAPTEUR = "CLEAR_CAPTEUR";
 export const ADD_CAPTEUR = "ADD_CAPTEUR";
 export const UPDATE_CAPTEUR = "UPDATE_CAPTEUR";
 export const SELECT_CAPTEUR = "SELECT_CAPTEUR";
+export const SET_DEFAULT = "SET_DEFAULT";
+
+export const setDefault = (capteurData) => {
+  return (dispatch) => {
+    dispatch({
+      type: SET_DEFAULT,
+      data: capteurData
+    })
+  }
+}
+
 
 export const clearCapteurs = () => {
   return (dispatch) => {
@@ -13,52 +24,23 @@ export const clearCapteurs = () => {
   };
 };
 
-export const addCapteur = (
-  macAddress,
-  id,
-  materiau,
-  description,
-  vitesseProp,
-  zone,
-  alerte
-) => {
+export const addCapteur = (capteurData) => {
   return async (dispatch) => {
     // TODO: enregistre le capteur sur le serveur
-
     dispatch({
       type: ADD_CAPTEUR,
-      macAddress,
-      id,
-      materiau,
-      description,
-      vitesseProp,
-      zone,
-      alerte,
+      data: capteurData,
     });
   };
 };
 
-export const updateCapteur = (
-  macAddress,
-  id,
-  materiau,
-  description,
-  vitesseProp,
-  zone,
-  alerte
-) => {
+export const updateCapteur = (capteurData) => {
   return async (dispatch) => {
     // TODO: enregistre le capteur sur le serveur
 
     dispatch({
       type: UPDATE_CAPTEUR,
-      macAddress,
-      id,
-      materiau,
-      description,
-      vitesseProp,
-      zone,
-      alerte,
+      data: capteurData,
     });
   };
 };
@@ -72,25 +54,11 @@ export const selectCapteur = (macAddress) => {
   };
 };
 
-const saveDataToStorage = (
-  macAddress,
-  id,
-  materiau,
-  description,
-  vitesseProp,
-  zone,
-  alerte
-) => {
+const saveDataToStorage = (capteurData) => {
   AsyncStorage.setItem(
     "capteurs",
     JSON.stringify({
-      macAddress,
-      id,
-      materiau,
-      description,
-      vitesseProp,
-      zone,
-      alerte,
+      ...capteurData,
     })
   );
 };

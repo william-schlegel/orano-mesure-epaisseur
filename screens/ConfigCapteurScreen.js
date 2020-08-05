@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Button,
   Picker,
+  ToastAndroid,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import { Formik } from "formik";
@@ -21,6 +22,7 @@ import * as capteurActions from "../store/actions/capteur";
 import { SERVEUR, DEBUG } from "../constants/Server";
 import { Materiaux } from "../data/materiaux";
 import Colors from "../constants/Colors";
+import defStyle from "../constants/Style";
 
 const CapteurSchema = Yup.object().shape({
   id: Yup.string().required("id obligatoire"),
@@ -54,17 +56,9 @@ export default function ConfigCapteurScreen({ navigation }) {
   }, [navigation]);
 
   const submitHandler = async (values) => {
-    await dispatch(
-      capteurActions.updateCapteur(
-        values.macAddress,
-        values.id,
-        values.materiau,
-        values.description,
-        values.vitesseProp,
-        values.zone,
-        values.alerte
-      )
-    );
+    await dispatch(capteurActions.updateCapteur(...values));
+    ToastAndroid.show("Configuration enregistrée", ToastAndroid.SHORT);
+    navigation.goBack();
   };
 
   return (
@@ -181,23 +175,6 @@ export default function ConfigCapteurScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    margin: 20,
-  },
-  row: {
-    flexDirection: "row",
-  },
-  h1: {
-    width: "100%",
-    fontSize: 25,
-    marginBottom: 10,
-  },
-  buttonContainer: {
-    marginTop: 20,
-  },
+  ...defStyle,
+  container: { ...defStyle.container, marginHorizontal: 15 },
 });

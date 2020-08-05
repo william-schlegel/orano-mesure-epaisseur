@@ -8,6 +8,7 @@ import ReduxThunk from "redux-thunk";
 
 import authReducers from "./store/reducers/auth";
 import captReducers from "./store/reducers/capteur";
+import mesuresReducers from "./store/reducers/mesure";
 
 import AppNavigator from "./navigation/AppNavigator";
 import { init } from "./helpers/db";
@@ -20,8 +21,7 @@ init()
 
 const rootReducer = combineReducers({
   capteurs: captReducers,
-  // campagnes: campReducers,
-  // sondages: sondagesReducers,
+  mesures: mesuresReducers,
   auth: authReducers,
 });
 

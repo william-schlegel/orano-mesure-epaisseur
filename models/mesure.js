@@ -3,6 +3,7 @@ import moment from "moment";
 class Mesure {
   constructor(
     idCapteur,
+    nomCapteur,
     debutA,
     largeurA,
     seuilA,
@@ -14,6 +15,7 @@ class Mesure {
     points
   ) {
     this.idCapteur = idCapteur;
+    this.nomCapteur = nomCapteur;
     this.debutA = parseFloat(debutA);
     this.largeurA = parseFloat(largeurA);
     this.seuilA = parseFloat(seuilA);
@@ -24,10 +26,6 @@ class Mesure {
     this.epaisseur = parseFloat(epaisseur);
     this.points = points;
   }
-  get readableDate() {
-    return moment(this.dateMesure).format("DD/MM/YYYY");
-  }
-
 }
 
 export default Mesure;

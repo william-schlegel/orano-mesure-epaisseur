@@ -1,7 +1,7 @@
 class Capteur {
   constructor(
     macAddress,
-    id,
+    nom,
     materiau,
     description,
     vitesseProp,
@@ -16,19 +16,19 @@ class Capteur {
     seuilB
   ) {
     this.macAddress = macAddress;
-    this.id = id;
+    this.nom = nom;
     this.materiau = materiau;
     this.description = description;
-    this.vitesseProp = vitesseProp;
     this.zone = zone;
-    this.alerte = alerte;
     this.photo = photo;
-    this.debutA = debutA;
-    this.largeurA = largeurA;
-    this.seuilA = seuilA;
-    this.debutB = debutB;
-    this.largeurB = largeurB;
-    this.seuilB = seuilB;
+    this.vitesseProp = isNaN(vitesseProp) ? 0 : parseFloat(vitesseProp);
+    this.alerte = isNaN(alerte) ? 0 : parseFloat(alerte);
+    this.debutA = isNaN(debutA) ? 0 : parseFloat(debutA);
+    this.largeurA = isNaN(largeurA) ? 0 : parseFloat(largeurA);
+    this.seuilA = isNaN(seuilA) ? 0 : parseFloat(seuilA);
+    this.debutB = isNaN(debutB) ? 0 : parseFloat(debutB);
+    this.largeurB = isNaN(largeurB) ? 0 : parseFloat(largeurB);
+    this.seuilB = isNaN(seuilB) ? 0 : parseFloat(seuilB);
   }
 }
 

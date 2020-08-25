@@ -35,9 +35,13 @@ const defStyle = {
     marginVertical: 10,
     padding: 5,
     width: "85%",
+    maxWidth: "95%",
   },
   cardContent: {
     margin: 5,
+  },
+  textLight: {
+    color: "#ccc",
   },
 };
 

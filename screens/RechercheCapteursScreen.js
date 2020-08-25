@@ -12,12 +12,12 @@ import {
   FlatList,
   Button,
 } from "react-native";
-import useFetch from "use-http";
 import { useDispatch } from "react-redux";
+import moment from "moment"
 
 import ImageTop from "../components/UI/ImageTop";
-import { SERVEUR, DEBUG } from "../constants/Server";
-import { Capteurs, CapteursData } from "../data/capteurs";
+import { DEBUG } from "../constants/Server";
+import { Capteurs } from "../data/capteurs";
 import Card from "../components/UI/Card";
 import Colors from "../constants/Colors";
 import {
@@ -26,15 +26,15 @@ import {
   clearCapteurs,
 } from "../store/actions/capteur";
 import defStyle from "../constants/Style";
+import { firestoreQuery, useFirestoreQuery } from "../helpers/hooks";
 
 export default function RechercheCapteursScreen({ navigation }) {
+  const dispatch = useDispatch();
   const [recherche, setRecherche] = useState(true);
   const [capteurs, setCapteurs] = useState([]);
-  const [capteursData, setCapteursData] = useState([]);
-  const { get, response, loading, error } = useFetch(`${SERVEUR}/capteurs`);
-  const dispatch = useDispatch();
 
   useEffect(() => {
+    dispatch(clearCapteurs())
     if (DEBUG) {
       setCapteurs(Capteurs);
       setRecherche(false);
@@ -49,108 +49,86 @@ export default function RechercheCapteursScreen({ navigation }) {
     });
   }, [navigation]);
 
-  useEffect(() => {
-    dispatch(clearCapteurs());
-    const dataCapteur = async (mac) => {
-      let info;
-      if (DEBUG) {
-        info = CapteursData.find((c) => c.macAddress === mac) || {
-          macAddress: mac,
-        };
-      } else {
-        info = await get(`/${mac}`);
-        if (!response.ok) info = { macAddress: mac };
-      }
-      dispatch(addCapteur(info));
-      return info;
-    };
-
-    const infos = [];
-    const searchInfos = async () => {
-      for (const c of capteurs) {
-        const info = await dataCapteur(c);
-        infos.push(info);
-      }
-      setCapteursData(infos);
-    };
-    searchInfos();
-  }, [capteurs]);
-
-  const selectCapt = useCallback((macAddress) => {
-    dispatch(selectCapteur(macAddress));
-    navigation.navigate("Mesure", { macAddress });
-  }, []);
-  const configure = useCallback((macAddress) => {
-    dispatch(selectCapteur(macAddress));
-    navigation.navigate("Config", { macAddress });
-  }, []);
-
-  const renderItem = ({ item }) => {
-    // item contient la mac address
-    return (
-      <View style={styles.cardContainer}>
-        <Card style={styles.card}>
-          <View style={styles.cardContent}>
-            {item.id && (
-              <View>
-                <View style={styles.ligneTexte}>
-                  <Text>{item.id}</Text>
-                  <Text>{item.description}</Text>
-                  <Text>{item.dernierReleve}</Text>
-                </View>
-                <View style={styles.buttons}>
-                  <Button
-                    color={Colors.primary}
-                    onPress={() => selectCapt(item.macAddress)}
-                    title="Sélectionner"
-                    style={styles.button}
-                  />
-                  <Button
-                    color={Colors.accent}
-                    onPress={() => configure(item.macAddress)}
-                    title="Configurer"
-                    style={styles.button}
-                  />
-                </View>
-              </View>
-            )}
-            {!item.id && (
-              <View>
-                <Text>Inconnu</Text>
-                <Button
-                  color={Colors.accent}
-                  onPress={() => configure(item.macAddress)}
-                  title="Configurer"
-                />
-              </View>
-            )}
-          </View>
-        </Card>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.screen}>
       <ImageTop />
       <View style={styles.container}>
-        {loading && <Text style={styles.h1}>Recherche de capteurs</Text>}
-        {error && (
-          <Text style={{ color: "red" }}>
-            Erreur lors de la récupération des capteurs
-          </Text>
-        )}
-        {recherche && <Text>Recherche de capteurs</Text>}
+        {recherche && <Text style={styles.h1}>Recherche de capteurs</Text>}
         <Text style={styles.h1}>Capteurs détectés</Text>
         <FlatList
-          data={capteursData}
-          renderItem={renderItem}
+          data={capteurs}
+          renderItem={({ item }) => <Capteur macAddress={item.macAddress} navigation={navigation}/>}
           keyExtractor={(item) => item.macAddress}
         />
       </View>
     </SafeAreaView>
   );
 }
+
+const Capteur = ({ macAddress, navigation }) => {
+  const dispatch = useDispatch();
+  const { data, status, error } = useFirestoreQuery(
+    firestoreQuery("capteur", macAddress)
+  );
+
+  const selectCapt = useCallback((macAddress) => {
+    dispatch(selectCapteur(macAddress));
+    navigation.navigate("Mesure", { macAddress });
+  }, []);
+
+  const configure = useCallback((macAddress) => {
+    dispatch(selectCapteur(macAddress));
+    navigation.navigate("Config", { macAddress });
+  }, []);
+
+  useEffect(() => {
+    if (data) dispatch(addCapteur(data));
+  }, [status, data]);
+
+  return (
+    <View style={styles.cardContainer}>
+      <Card style={styles.card}>
+        <View style={styles.cardContent}>
+          {status === "loading" && <Text>chargement...</Text>}
+          {status === "success" && data && (
+            <View>
+              <View style={styles.ligneTexte}>
+                <Text>{data.nom}</Text>                
+                <Text>{data.description}</Text>
+                <Text>{data.dernierReleve ? moment(data.dernierReleve).format("DD/MM/YYYY") : "jamais relevé"}</Text>
+              </View>
+              <Text style={styles.textLight}>{data.macAddress}</Text>
+              <View style={styles.buttons}>
+                <Button
+                  color={Colors.primary}
+                  onPress={() => selectCapt(macAddress)}
+                  title="Sélectionner"
+                  style={styles.button}
+                />
+                <Button
+                  color={Colors.accent}
+                  onPress={() => configure(macAddress)}
+                  title="Configurer"
+                  style={styles.button}
+                />
+              </View>
+            </View>
+          )}
+          {status === "success" && !data && (
+            <View>
+              <Text>Capteur inconnu <Text style={styles.textLight}>  ({macAddress})</Text></Text>
+              <Button
+                color={Colors.accent}
+                onPress={() => configure(macAddress)}
+                title="Configurer"
+              />
+            </View>
+          )}
+        </View>
+      </Card>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   ...defStyle,

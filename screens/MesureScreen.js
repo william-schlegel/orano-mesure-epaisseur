@@ -15,11 +15,12 @@ import Input from "../components/UI/Input";
 import Card from "../components/UI/Card";
 import Colors from "../constants/Colors";
 import ImageTop from "../components/UI/ImageTop";
-import * as capteurActions from "../store/actions/capteur";
 import defStyle from "../constants/Style";
 import { DEBUG } from "../constants/Server";
 import { courbe } from "../data/courbe";
 import DessinCourbe from "../components/DessinCourbe";
+import * as capteurActions from "../store/actions/capteur";
+import * as mesureActions from "../store/actions/mesure";
 
 const ConfigSchema = Yup.object().shape({
   debutA: Yup.number(),
@@ -40,7 +41,7 @@ export const ConfigMesure = ({ navigation }) => {
     const parent = navigation.dangerouslyGetParent();
     if (parent)
       parent.setOptions({
-        headerTitle: `Mesure capteur ${SelectedCapteur.id}`,
+        headerTitle: `Mesure capteur ${SelectedCapteur.nom}`,
       });
   }, [navigation, SelectedCapteur]);
 
@@ -146,6 +147,11 @@ export const CourbeMesure = ({ navigation, route }) => {
   const [mesure, setMesure] = useState(route.params && route.params.mesure);
   const [points, setPoints] = useState([]);
   const [freqEchMHz, setFreqEchMHz] = useState(125);
+  const [epaisseur, setEpaisseur] = useState(0);
+  const SelectedCapteur = useSelector((state) => {
+    return state.capteurs.selected;
+  });
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (mesure) {
@@ -163,9 +169,32 @@ export const CourbeMesure = ({ navigation, route }) => {
   };
 
   const saveMesure = () => {
-    
-    navigation.goBack()
-  }
+    dispatch(
+      mesureActions.addMesure(
+        {
+          macAddress: SelectedCapteur.macAddress,
+          nomCapteur: SelectedCapteur.nom,
+          debutA: SelectedCapteur.debutA,
+          largeurA: SelectedCapteur.largeurA,
+          seuilA: SelectedCapteur.seuilA,
+          debutB: SelectedCapteur.debutB,
+          largeurB: SelectedCapteur.largeurB,
+          seuilB: SelectedCapteur.seuilB,
+        },
+        new Date(),
+        epaisseur,
+        points
+      )
+    );
+    navigation.goBack();
+  };
+
+  const handlePics = (picA, picB) => {
+    const µA = picA / freqEchMHz;
+    const µB = picB / freqEchMHz;
+    const vitesseProp = SelectedCapteur.vitesseProp;
+    setEpaisseur(((µB - µA) * vitesseProp) / 1000);
+  };
 
   return (
     <>
@@ -179,8 +208,26 @@ export const CourbeMesure = ({ navigation, route }) => {
             vertical={false}
             height={300}
             width={0}
+            dataMesure={{
+              debutA: SelectedCapteur.debutA,
+              largeurA: SelectedCapteur.largeurA,
+              seuilA: SelectedCapteur.seuilA,
+              debutB: SelectedCapteur.debutB,
+              largeurB: SelectedCapteur.largeurB,
+              seuilB: SelectedCapteur.seuilB,
+            }}
+            handlePics={handlePics}
           />
-          <Text style={styles.h2}>Mesure: 4.98mm</Text>
+          <Text
+            style={{
+              ...styles.h2,
+              fontWeight:"800",
+              fontSize:25,
+              color: epaisseur < SelectedCapteur.alert ? "red" : "green",
+            }}
+          >
+            Mesure: {epaisseur.toFixed(2)}mm
+          </Text>
           <View style={styles.button}>
             <Button
               title="relancer une mesure"

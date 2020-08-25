@@ -17,15 +17,15 @@ const getIdMax = (points) => {
 
 export default function DessinCourbe({
   points,
+  dataMesure,
   freqEchMHz = 125,
   vertical = true,
   height = 0,
   width = 0,
+  handlePics = (picA, picB) => {
+    return { picA, picB };
+  },
 }) {
-  const SelectedCapteur = useSelector((state) => {
-    return state.capteurs.selected;
-  });
-
   const handleCanvas = (canvas) => {
     if (!points.length) return;
     if (!canvas) return;
@@ -45,7 +45,7 @@ export default function DessinCourbe({
     const ctx = canvas.getContext("2d");
 
     ctx.strokeStyle = "grey";
-    ctx.strokeRect(0, 0, canvas.width-1, canvas.height);
+    ctx.strokeRect(0, 0, canvas.width - 1, canvas.height);
 
     const drawPorte = (debut, largeur, seuil, couleur) => {
       // porte
@@ -82,6 +82,7 @@ export default function DessinCourbe({
         ctx.setLineDash([5, 5]);
         ctx.stroke();
       }
+      return pic;
     };
 
     // courbe
@@ -134,18 +135,19 @@ export default function DessinCourbe({
       ech += totalµs / 10;
     }
     ctx.stroke();
-    drawPorte(
-      SelectedCapteur.debutA,
-      SelectedCapteur.largeurA,
-      SelectedCapteur.seuilA,
+    const picA = drawPorte(
+      dataMesure.debutA,
+      dataMesure.largeurA,
+      dataMesure.seuilA,
       "red"
     );
-    drawPorte(
-      SelectedCapteur.debutB,
-      SelectedCapteur.largeurB,
-      SelectedCapteur.seuilB,
+    const picB = drawPorte(
+      dataMesure.debutB,
+      dataMesure.largeurB,
+      dataMesure.seuilB,
       "blue"
     );
+    handlePics(picA, picB);
   };
   return (
     <View style={styles.courbe}>

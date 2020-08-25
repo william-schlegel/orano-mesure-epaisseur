@@ -4,27 +4,51 @@ export const db = SQLite.openDatabase("mesure.db");
 
 const Tables = [
   {
-    version: 1,
-    table: "mesures",
+    table: "materiau",
     champs: [
-      "mesure_id TEXT NOT NULL PRIMARY KEY",
-      "date DATE NOT NULL",
-      "resultat REAL NOT NULL",
+      "id TEXT NOT NULL PRIMARY KEY",
+      "description TEXT NOT NULL",
+      "vitesseProp REAL NOT NULL",
     ],
   },
   {
-    version: 1,
-    table: "mesures_points",
+    table: "capteur",
     champs: [
-      "mesure_id TEXT NOT NULL",
-      "numero INTEGER NOT NULL",
-      "valeur REAL NOT NULL",
-      "PRIMARY KEY (mesure_id, numero)",
+      "id TEXT NOT NULL PRIMARY KEY",
+      "macAddress TEXT NOT NULL",
+      "materiauId TEXT NOT NULL",
+      "description TEXT NOT NULL",
+      "vitesseProp REAL NOT NULL",
+      "zone TEXT NOT NULL",
+      "alerte REAL NOT NULL",
+      "photo TEXT NOT NULL",
+      "debutA REAL NOT NULL",
+      "largeurA REAL NOT NULL",
+      "seuilA REAL NOT NULL",
+      "debutB REAL NOT NULL",
+      "largeurB REAL NOT NULL",
+      "seuilB REAL NOT NULL",
+    ],
+  },
+  {
+    table: "mesure",
+    champs: [
+      "idCapteur TEXT NOT NULL",
+      "dateMesure TEXT NOT NULL",
+      "debutA REAL NOT NULL",
+      "largeurA REAL NOT NULL",
+      "seuilA REAL NOT NULL",
+      "debutB REAL NOT NULL",
+      "largeurB REAL NOT NULL",
+      "seuilB REAL NOT NULL",
+      "epaisseur REAL NOT NULL",
+      "points TEXT NOT NULL",
+      "PRIMARY KEY (idCapteur, dateMesure)",
     ],
   },
 ];
 
-const initTable = (table, version, champs) => {
+const initTable = (table, champs) => {
   return new Promise((resolve, reject) => {
     // check version de la table existante
     console.log("init table", table);
@@ -46,8 +70,8 @@ const initTable = (table, version, champs) => {
 
 export const init = () => {
   return Promise.all(
-    Tables.map(({ version, table, champs }) => {
-      return initTable(table, version, champs);
+    Tables.map(({ table, champs }) => {
+      return initTable(table, champs);
     })
   );
 };

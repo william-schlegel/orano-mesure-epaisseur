@@ -5,13 +5,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { createStore, combineReducers, applyMiddleware } from "redux";
 import { Provider } from "react-redux";
 import ReduxThunk from "redux-thunk";
+import { YellowBox } from "react-native";
 
 import authReducers from "./store/reducers/auth";
 import captReducers from "./store/reducers/capteur";
 import mesuresReducers from "./store/reducers/mesure";
+import optionsReducers from "./store/reducers/options";
 
 import AppNavigator from "./navigation/AppNavigator";
 import { init } from "./helpers/db";
+
+import "./helpers/firebase";
 
 init()
   .then(console.log("Databse ok"))
@@ -23,6 +27,7 @@ const rootReducer = combineReducers({
   capteurs: captReducers,
   mesures: mesuresReducers,
   auth: authReducers,
+  options: optionsReducers,
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
@@ -36,6 +41,7 @@ const fetchFonts = () => {
 };
 
 export default function App() {
+  YellowBox.ignoreWarnings(["Setting a timer"]);
   const [fontLoaded, setFontLoaded] = useState(false);
 
   if (!fontLoaded) {

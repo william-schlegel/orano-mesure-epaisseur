@@ -11,6 +11,8 @@ import RechercheCapteursScreen from "../screens/RechercheCapteursScreen";
 import { ConfigMesure, CourbeMesure } from "../screens/MesureScreen";
 import { JournalMesures } from "../screens/JournalScreen"
 import Colors from "../constants/Colors";
+import SynchroScreen from "../screens/SynchroScreen";
+import OptionsScreen from "../screens/OptionsScreen";
 
 /*------------- Stack navigator -----------------------*/
 
@@ -39,6 +41,8 @@ export const MainNavigator = () => {
       />
       <MesureStackNavigator.Screen name="Journal" component={JournalMesures} />
       <MesureStackNavigator.Screen name="Mesure" component={MesureNavigator} />
+      <MesureStackNavigator.Screen name="Synchro" component={SynchroScreen} />
+      <MesureStackNavigator.Screen name="Options" component={OptionsScreen} />
       <MesureStackNavigator.Screen name="Config" component={ConfigScreen} />
     </MesureStackNavigator.Navigator>
   );

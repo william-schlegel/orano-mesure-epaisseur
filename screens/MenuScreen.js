@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useEffect } from "react";
 import { StyleSheet, Button, View } from "react-native";
 import { useDispatch } from "react-redux";
 
@@ -6,9 +6,14 @@ import Colors from "../constants/Colors";
 import { logout } from "../store/actions/auth";
 import ImageTop from "../components/UI/ImageTop";
 import defStyle from "../constants/Style";
+import { getOptions } from "../store/actions/options";
 
 export default function MenuScreen({ navigation }) {
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getOptions());
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -42,6 +47,10 @@ export default function MenuScreen({ navigation }) {
             onPress={() => handleButton("Synchro")}
           />
           <ButtonMenu
+            title={"Options"}
+            onPress={() => handleButton("Options")}
+          />
+          <ButtonMenu
             title={"Se déconnecter"}
             onPress={handleLogout}
             color={Colors.accent}
@@ -55,11 +64,7 @@ export default function MenuScreen({ navigation }) {
 const ButtonMenu = ({ title, onPress, color }) => {
   return (
     <View style={styles.button}>
-      <Button
-        title={title}
-        color={color || Colors.primary}
-        onPress={onPress}
-      />
+      <Button title={title} color={color || Colors.primary} onPress={onPress} />
     </View>
   );
 };

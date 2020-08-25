@@ -36,17 +36,23 @@ export default (state = initialState, action) => {
       };
     }
     case ADD_CAPTEUR: {
+      // regarde si le capteur exite déjà
+      const capteur = state.liste.find(
+        (c) => c.macAddress === action.data.macAddress
+      );
+      if (capteur) return state;
+      // sinon l'ajoute
       const liste = state.liste;
       liste.push(
         new Capteur(
           action.data.macAddress,
-          action.data.id,
+          action.data.nom,
           action.data.materiau,
           action.data.description,
-          parseFloat(action.data.vitesseProp),
+          action.data.vitesseProp,
           action.data.zone,
-          parseFloat(action.data.alerte),
-          action.data.photo,
+          action.data.alerte,
+          action.data.photo || "",
           action.data.debutA || state.configDefaut.debutA,
           action.data.largeurA || state.configDefaut.largeurA,
           action.data.seuilA || state.configDefaut.seuilA,
@@ -63,13 +69,13 @@ export default (state = initialState, action) => {
       if (id < 0) return state;
       liste[id] = new Capteur(
         action.data.macAddress,
-        action.data.id,
+        action.data.nom,
         action.data.materiau,
         action.data.description,
-        parseFloat(action.data.vitesseProp),
+        action.data.vitesseProp,
         action.data.zone,
-        parseFloat(action.data.alerte),
-        action.data.photo,
+        action.data.alerte,
+        action.data.photo || "",
         action.data.debutA || state.configDefaut.debutA,
         action.data.largeurA || state.configDefaut.largeurA,
         action.data.seuilA || state.configDefaut.seuilA,
@@ -77,25 +83,47 @@ export default (state = initialState, action) => {
         action.data.largeurB || state.configDefaut.largeurB,
         action.data.seuil || state.configDefaut.seuilB
       );
-      const selected = (state.selected.macAddress === action.data.macAddress) ? liste[id] : state.selected        
+      const selected =
+        state.selected.macAddress === action.data.macAddress
+          ? liste[id]
+          : state.selected;
       return { ...state, selected, liste };
     }
     case SELECT_CAPTEUR: {
       const capteur = state.liste.find(
         (c) => c.macAddress === action.macAddress
       );
-
+      if (!capteur)
+        return {
+          ...state,
+          selected: new Capteur(
+            action.macAddress,
+            "",
+            "",
+            "",
+            0,
+            "",
+            0,
+            "",
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ),
+        };
       return {
         ...state,
         selected: new Capteur(
           capteur.macAddress,
-          capteur.id,
+          capteur.nom,
           capteur.materiau,
           capteur.description,
           capteur.vitesseProp,
           capteur.zone,
           capteur.alerte,
-          capteur.photo,
+          capteur.photo || "",
           capteur.debutA || state.configDefaut.debutA,
           capteur.largeurA || state.configDefaut.largeurA,
           capteur.seuilA || state.configDefaut.seuilA,

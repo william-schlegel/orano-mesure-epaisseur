@@ -1,4 +1,5 @@
-import { AsyncStorage } from "react-native";
+import { addDocument } from "../../helpers/firebase";
+import Capteur from "../../models/capteur";
 
 export const CLEAR_CAPTEUR = "CLEAR_CAPTEUR";
 export const ADD_CAPTEUR = "ADD_CAPTEUR";
@@ -10,11 +11,10 @@ export const setDefault = (capteurData) => {
   return (dispatch) => {
     dispatch({
       type: SET_DEFAULT,
-      data: capteurData
-    })
-  }
-}
-
+      data: capteurData,
+    });
+  };
+};
 
 export const clearCapteurs = () => {
   return (dispatch) => {
@@ -24,9 +24,12 @@ export const clearCapteurs = () => {
   };
 };
 
+/**
+ * ajoute un capteur identifié dans la liste
+ * @param {Object} capteurData data du capteur récupéré
+ */
 export const addCapteur = (capteurData) => {
   return async (dispatch) => {
-    // TODO: enregistre le capteur sur le serveur
     dispatch({
       type: ADD_CAPTEUR,
       data: capteurData,
@@ -34,10 +37,28 @@ export const addCapteur = (capteurData) => {
   };
 };
 
+/**
+ * mise à jour capteur
+ * @param {Object} capteurData met à jour le capteur dans la liste et sur le serveur
+ */
 export const updateCapteur = (capteurData) => {
   return async (dispatch) => {
-    // TODO: enregistre le capteur sur le serveur
-
+    const res = await addDocument("capteur", capteurData.macAddress, {...new Capteur(
+      capteurData.macAddress,
+      capteurData.nom,
+      capteurData.materiau,
+      capteurData.description,
+      capteurData.vitesseProp,
+      capteurData.zone,
+      capteurData.alerte,
+      capteurData.photo,
+      capteurData.debutA,
+      capteurData.largeurA,
+      capteurData.seuilA,
+      capteurData.debutB,
+      capteurData.largeurB,
+      capteurData.seuilB
+    )});
     dispatch({
       type: UPDATE_CAPTEUR,
       data: capteurData,
@@ -52,13 +73,4 @@ export const selectCapteur = (macAddress) => {
       macAddress,
     });
   };
-};
-
-const saveDataToStorage = (capteurData) => {
-  AsyncStorage.setItem(
-    "capteurs",
-    JSON.stringify({
-      ...capteurData,
-    })
-  );
 };

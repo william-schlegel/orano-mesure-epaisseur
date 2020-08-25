@@ -5,7 +5,6 @@ import {
   KeyboardAvoidingView,
   View,
   ScrollView,
-  ActivityIndicator,
   Button,
   Picker,
   ToastAndroid,
@@ -13,19 +12,17 @@ import {
 import { useDispatch } from "react-redux";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import useFetch from "use-http";
 import { useSelector } from "react-redux";
 
 import Input from "../components/UI/Input";
 import ImageTop from "../components/UI/ImageTop";
 import * as capteurActions from "../store/actions/capteur";
-import { SERVEUR, DEBUG } from "../constants/Server";
-import { Materiaux } from "../data/materiaux";
 import Colors from "../constants/Colors";
 import defStyle from "../constants/Style";
+import { firestoreQuery, useFirestoreQuery } from "../helpers/hooks";
 
 const CapteurSchema = Yup.object().shape({
-  id: Yup.string().required("id obligatoire"),
+  nom: Yup.string().required("nom obligatoire"),
   materiau: Yup.string(),
   description: Yup.string(),
   vitesseProp: Yup.number(),
@@ -35,28 +32,29 @@ const CapteurSchema = Yup.object().shape({
 
 export default function ConfigCapteurScreen({ navigation }) {
   const dispatch = useDispatch();
-  const { post, response, loading, error } = useFetch(`${SERVEUR}/capteurs`);
   const [materiaux, setMateriaux] = useState([]);
   const selectedCapteur = useSelector((state) => {
     return state.capteurs.selected;
   });
+  const { data, status, error } = useFirestoreQuery(firestoreQuery("materiau"));
+
   useEffect(() => {
-    if (DEBUG) setMateriaux(Materiaux);
-    else {
-      // TODO: fetch materiaux
+    if (status === "success" && data) {
+      setMateriaux(data);
     }
-  }, [Materiaux]);
+  }, [data, status, setMateriaux]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: selectedCapteur.id
-        ? `Configuration capteur ${selectedCapteur.id}`
+      headerTitle: selectedCapteur.nom
+        ? `Configuration capteur ${selectedCapteur.nom}`
         : "Configuration nouveau capteur",
     });
   }, [navigation]);
 
-  const submitHandler = async (values) => {
-    await dispatch(capteurActions.updateCapteur(...values));
+  const submitHandler = (values) => {
+    values.photo = "";
+    dispatch(capteurActions.updateCapteur(values));
     ToastAndroid.show("Configuration enregistrée", ToastAndroid.SHORT);
     navigation.goBack();
   };
@@ -71,7 +69,7 @@ export default function ConfigCapteurScreen({ navigation }) {
       <Formik
         initialValues={{
           macAddress: selectedCapteur.macAddress,
-          id: selectedCapteur.id,
+          nom: selectedCapteur.nom,
           description: selectedCapteur.description,
           materiau: selectedCapteur.materiau,
           vitesseProp: selectedCapteur.vitesseProp.toString(),
@@ -87,8 +85,8 @@ export default function ConfigCapteurScreen({ navigation }) {
               <Input name="macAddress" label="Adresse MAC" editable={false} />
               <View style={styles.row}>
                 <Input
-                  name="id"
-                  label="Id capteur"
+                  name="nom"
+                  label="Nom capteur"
                   half
                   autoCapitalize="characters"
                 />
@@ -99,27 +97,31 @@ export default function ConfigCapteurScreen({ navigation }) {
                   }}
                 >
                   <Text style={{ fontWeight: "bold" }}>Matériau mesuré</Text>
-                  <Picker
-                    selectedValue={values.materiau}
-                    onValueChange={(value, index) => {
-                      setFieldValue("materiau", value);
-                      const mat = materiaux.find((m) => m.id === value);
-                      if (mat)
-                        return setFieldValue(
-                          "vitesseProp",
-                          mat.vitesseProp.toString()
-                        );
-                    }}
-                  >
-                    {materiaux &&
-                      materiaux.map((m) => (
-                        <Picker.Item
-                          key={m.id}
-                          label={m.description}
-                          value={m.id}
-                        />
-                      ))}
-                  </Picker>
+
+                  {status === "success" && data && (
+                    <Picker
+                      selectedValue={values.materiau}
+                      onValueChange={(value, index) => {
+                        setFieldValue("materiau", value);
+                        const mat = materiaux.find((m) => m.id === value);
+                        if (mat)
+                          return setFieldValue(
+                            "vitesseProp",
+                            mat.vitesseProp.toString()
+                          );
+                      }}
+                    >
+                      {materiaux &&
+                        materiaux.map((m) => (
+                          <Picker.Item
+                            key={m.id}
+                            label={m.description}
+                            value={m.id}
+                          />
+                        ))}
+                    </Picker>
+                  )}
+                  {status === "loading" && <Text>chargement...</Text>}
                 </View>
               </View>
               <View style={styles.row}>
@@ -151,21 +153,12 @@ export default function ConfigCapteurScreen({ navigation }) {
                 />
               </View>
               <View style={styles.buttonContainer}>
-                {loading ? (
-                  <ActivityIndicator size="small" color={Colors.primary} />
-                ) : (
-                  <Button
-                    title={"Enregistrer"}
-                    color={Colors.primary}
-                    onPress={handleSubmit}
-                  />
-                )}
+                <Button
+                  title={"Enregistrer"}
+                  color={Colors.primary}
+                  onPress={handleSubmit}
+                />
               </View>
-              {error && (
-                <Text style={{ color: "red" }}>
-                  Erreur lors de l'enregistrement
-                </Text>
-              )}
             </View>
           </ScrollView>
         )}

@@ -1,8 +1,18 @@
 import React, { useLayoutEffect, useEffect, useState } from "react";
-import { StyleSheet, View, Button, Picker, FlatList } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Button,
+  Picker,
+  FlatList,
+  Modal,
+  Text,
+  Dimensions,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { LineChart } from "react-native-chart-kit";
 
 import IconButton from "../components/UI/IconButton";
 import Colors from "../constants/Colors";
@@ -16,11 +26,13 @@ export const JournalMesures = ({ navigation }) => {
   const [dateDeb, setDateDeb] = useState(new Date());
   const [dateFin, setDateFin] = useState(new Date());
   const [idCapteur, setIdCapteur] = useState("");
+  const [showModal, setShowModal] = useState({id: ""});
 
   const dispatch = useDispatch();
 
   const minDate = useSelector((state) => state.mesures.minDate);
   const maxDate = useSelector((state) => state.mesures.maxDate);
+  const listeMesures = useSelector((state) => state.mesures.liste);
   const listeSelected = useSelector((state) => state.mesures.selected);
   const listeCapteurs = useSelector((state) => state.mesures.listeCapteurs);
 
@@ -53,8 +65,69 @@ export const JournalMesures = ({ navigation }) => {
     else setDateFin(selectedDate || dateFin);
   };
 
+  const evolutionCapteur = (idCapteur) => {
+    setShowModal(idCapteur);
+  };
+
+  const findData = (idCapteur) => {
+    const mesures = listeMesures
+      .filter((lm) => lm.idCapteur === idCapteur)
+      .map((lm) => {
+        return { dateMesure: lm.dateMesure, epaisseur: lm.epaisseur };
+      });
+    const labels = [];
+    const data = [];
+    for (const m of mesures) {
+      labels.push(moment(m.dateMesure).format("MM/YY"));
+      data.push(m.epaisseur);
+    }
+    return {
+      labels,
+      datasets: [{ data }],
+    };
+  };
+
   return (
     <View style={styles.screen}>
+      <Modal visible={showModal.id !== ""}>
+        <Text style={styles.h1}>Evolution capteur {showModal.nom}</Text>
+        <LineChart
+          data={findData(showModal.id)}
+          width={Dimensions.get("window").width - 10}
+          height={220}
+          chartConfig={{
+            backgroundGradientFrom: "#fff",
+            backgroundGradientTo: "#fff",
+            decimalPlaces: 2, // optional, defaults to 2dp
+            color: () => Colors.accent,
+            labelColor: () => Colors.primary,
+            propsForDots: {
+              r: "6",
+              strokeWidth: "2",
+              stroke: Colors.primary,
+              fill: Colors.primary,
+            },
+          }}
+          bezier
+          style={{
+            margin: 5,
+          }}
+        />
+        <View
+          style={{
+            justifyContent: "center",
+            width: "100%",
+            paddingHorizontal: 30,
+          }}
+        >
+          <Button
+            title="Fermer"
+            onPress={() => setShowModal({id: ""})}
+            color={Colors.primary}
+            style={{ witdh: "100%" }}
+          />
+        </View>
+      </Modal>
       <ImageTop />
       <View style={styles.row}>
         <View style={styles.button}>
@@ -80,7 +153,7 @@ export const JournalMesures = ({ navigation }) => {
         >
           <Picker.Item key="TOUT" label="Tous les capteurs" value="" />
           {listeCapteurs.map((c) => (
-            <Picker.Item key={c} label={c} value={c} />
+            <Picker.Item key={c.idCapteur} label={c.nomCapteur} value={c.idCapteur} />
           ))}
         </Picker>
         <IconButton
@@ -91,7 +164,12 @@ export const JournalMesures = ({ navigation }) => {
       </View>
       <FlatList
         data={listeSelected}
-        renderItem={({ item }) => <EntreeMesure item={item} />}
+        renderItem={({ item }) => (
+          <EntreeMesure
+            item={item}
+            onClickId={() => evolutionCapteur({id: item.idCapteur, nom: item.nomCapteur})}
+          />
+        )}
         keyExtractor={(item) => `K-${item.id}`}
       />
       {showDate > 0 && (
@@ -111,6 +189,9 @@ const styles = StyleSheet.create({
   cardContainer: {
     ...defStyle.cardContainer,
     justifyContent: "flex-start",
+  },
+  cardCentered: {
+    ...defStyle.cardContainer,
   },
   row: {
     ...defStyle.row,

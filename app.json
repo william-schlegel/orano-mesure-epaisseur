@@ -6,7 +6,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -21,6 +23,12 @@
         "WRITE_EXTERNAL_STORAGE"
       ]
     },
-    "assetBundlePatterns": ["**/*"]
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "sdkVersion": "38.0.0",
+    "ios": {
+      "bundleIdentifier": "com.stimshop.mesureepaisseur"
+    }
   }
 }
